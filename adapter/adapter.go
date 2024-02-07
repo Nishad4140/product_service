@@ -1,6 +1,8 @@
 package adapter
 
 import (
+	"fmt"
+
 	"github.com/Nishad4140/product_service/entities"
 	"gorm.io/gorm"
 )
@@ -21,4 +23,16 @@ func (product *ProductAdapter) AddProduct(req entities.Products) (entities.Produ
 	query := "INSERT INTO products (name,price,quantity) VALUES ($1, $2, $3) RETURNING id, name, price, quantity"
 
 	return res, product.DB.Raw(query, req.Name, req.Price, req.Quantity).Scan(&res).Error
+}
+
+func (product *ProductAdapter) GetAllProducts() ([]entities.Products, error) {
+	var res []entities.Products
+
+	query := "SELECT * FROM products"
+
+	if err := product.DB.Raw(query).Scan(res).Error; err != nil {
+		return nil, fmt.Errorf("error while getting products : %v", err)
+	}
+
+	return res, nil
 }
