@@ -6,16 +6,19 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/Nishad4140/product_service/db"
 	"github.com/Nishad4140/product_service/initializer"
 	"github.com/Nishad4140/product_service/service"
+	servicediscoveryconsul "github.com/Nishad4140/product_service/servicediscovery_consul"
 	"github.com/Nishad4140/proto_files/pb"
 	"github.com/joho/godotenv"
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 func main() {
@@ -43,6 +46,16 @@ func main() {
 	}
 
 	log.Printf("Product server is listening on port 3000")
+
+	go func() {
+		time.Sleep(5 * time.Second)
+
+		servicediscoveryconsul.RegisterService()
+	}()
+
+	healthService := &service.HealthChecker{}
+
+	grpc_health_v1.RegisterHealthServer(server, healthService)
 
 	tracer, closer := initTracer()
 
