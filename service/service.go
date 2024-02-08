@@ -33,7 +33,7 @@ func NewProductService(adapter adapter.AdapterInterface) *ProductService {
 	}
 }
 
-func (product *ProductService) AddPorduct(ctx context.Context, req *pb.AddProductRequest) (*pb.AddProductResponse, error) {
+func (product *ProductService) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*pb.AddProductResponse, error) {
 
 	span := Tracer.StartSpan("add products grpc")
 
@@ -52,6 +52,28 @@ func (product *ProductService) AddPorduct(ctx context.Context, req *pb.AddProduc
 	res, err := product.Adapter.AddProduct(reqEntity)
 	if err != nil {
 		return nil, err
+	}
+
+	return &pb.AddProductResponse{
+		Id:       uint32(res.Id),
+		Name:     res.Name,
+		Price:    int32(res.Price),
+		Quantity: int32(res.Quantity),
+	}, nil
+}
+
+func (product *ProductService) GetProduct(ctx context.Context, req *pb.GetProductByID) (*pb.AddProductResponse, error) {
+
+	span := Tracer.StartSpan("get products by using id")
+	defer span.Finish()
+
+	res, err := product.Adapter.GetProduct(uint(req.Id))
+	if err != nil {
+		return nil, err
+	}
+
+	if res.Name == "" {
+		return nil, fmt.Errorf("there is no product in the given id")
 	}
 
 	return &pb.AddProductResponse{
@@ -82,6 +104,42 @@ func (product *ProductService) GetAllProducts(em *empty.Empty, srv pb.ProductSer
 		}
 	}
 	return nil
+}
+
+func (product *ProductService) UpdateStock(ctx context.Context, req *pb.UpdateStockRequest) (*pb.AddProductResponse, error) {
+
+	span := Tracer.StartSpan("update quantity of product")
+	defer span.Finish()
+
+	var res *pb.AddProductResponse
+
+	if req.Increase {
+
+		result, err := product.Adapter.IncrementStock(uint(req.Id), int(req.Quantity))
+		if err != nil {
+			return nil, err
+		}
+
+		res = &pb.AddProductResponse{
+			Id:       uint32(result.Id),
+			Name:     result.Name,
+			Price:    int32(result.Price),
+			Quantity: int32(result.Quantity),
+		}
+	} else {
+		result, err := product.Adapter.DecrementStock(uint(req.Id), int(req.Quantity))
+		if err != nil {
+			return nil, err
+		}
+		res = &pb.AddProductResponse{
+			Id:       uint32(result.Id),
+			Name:     result.Name,
+			Price:    int32(result.Price),
+			Quantity: int32(result.Quantity),
+		}
+	}
+
+	return res, nil
 }
 
 type HealthChecker struct {

@@ -3,7 +3,6 @@ package servicediscoveryconsul
 import (
 	"fmt"
 	"log"
-	"net"
 
 	consulapi "github.com/hashicorp/consul/api"
 )
@@ -23,7 +22,7 @@ func RegisterService() {
 		return
 	}
 
-	addr := getHostName()
+	addr := "localhost"
 
 	log.Println(addr)
 
@@ -49,23 +48,4 @@ func RegisterService() {
 		log.Printf("successfully register service: %s:%v", addr, port)
 	}
 
-}
-
-func getHostName() (ip string) {
-
-	adds, err := net.InterfaceAddrs()
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-
-	for _, addr := range adds {
-		if ipaddr, ok := addr.(*net.IPNet); ok && !ipaddr.IP.IsLoopback() {
-			if ipaddr.IP.To4() != nil {
-				ip = ipaddr.IP.String()
-				return
-			}
-		}
-	}
-	return
 }

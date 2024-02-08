@@ -3,7 +3,7 @@ module github.com/Nishad4140/product_service
 go 1.21.0
 
 require (
-	github.com/Nishad4140/proto_files v0.0.0-20240207083244-b531ef2e5e67
+	github.com/Nishad4140/proto_files v0.0.0-20240208092333-6d0bb26b31c2
 	github.com/golang/protobuf v1.5.3
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
