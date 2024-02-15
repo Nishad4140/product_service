@@ -38,7 +38,7 @@ func RegisterService() {
 		},
 	}
 
-	log.Println(fmt.Sprintf("%s:%d/%s", addr, port, serviceID))
+	log.Printf(fmt.Sprintf("%s:%d/%s", addr, port, serviceID))
 
 	regiErr := consul.Agent().ServiceRegister(registration)
 
